@@ -24,7 +24,19 @@ class WanTrainingModule(DiffusionTrainingModule):
         model_configs = self.parse_model_configs(model_paths, model_id_with_origin_paths, enable_fp8_training=False)
         if audio_processor_config is not None:
             audio_processor_config = ModelConfig(model_id=audio_processor_config.split(":")[0], origin_file_pattern=audio_processor_config.split(":")[1])
-        self.pipe = WanVideoPipeline.from_pretrained(torch_dtype=torch.bfloat16, device="cpu", model_configs=model_configs, audio_processor_config=audio_processor_config)
+        # self.pipe = WanVideoPipeline.from_pretrained(torch_dtype=torch.bfloat16, device="cpu", model_configs=model_configs, audio_processor_config=audio_processor_config)
+        self.pipe = WanVideoPipeline.from_pretrained(
+            torch_dtype=torch.bfloat16,
+            device="cpu",
+            model_configs=model_configs,
+            audio_processor_config=audio_processor_config,
+            # 指定本地tokenizer路径
+            tokenizer_config=ModelConfig(
+                model_id="Wan-AI/Wan2.2-T2V-A14B",  # 模型ID（可保持与主模型一致）
+                origin_file_pattern="google/*",      # 匹配分词器文件的通配符
+                path="path/to/local/Wan2.2-T2V-A14B/google/umt5-xxl"  # 本地分词器文件夹绝对路径
+            )
+        )
         
         # Training mode
         self.switch_pipe_to_training_mode(
